@@ -1,0 +1,86 @@
+<html>
+<body>
+<pre>
+<h1>µVision Build Log</h1>
+<h2>Tool Versions:</h2>
+IDE-Version: µVision V5.41.0.0
+Copyright (C) 2024 ARM Ltd and ARM Germany GmbH. All rights reserved.
+License Information: Abhishek Gawayi, Bits Pilani, LIC=----
+ 
+Tool Versions:
+Toolchain:       MDK-Lite  Version: 5.41.0.0
+Toolchain Path:  C:\Keil_541\ARM\ARMCLANG\Bin
+C Compiler:      ArmClang.exe V6.22
+Assembler:       Armasm.exe V6.22
+Linker/Locator:  ArmLink.exe V6.22
+Library Manager: ArmAr.exe V6.22
+Hex Converter:   FromElf.exe V6.22
+CPU DLL:         SARMCM3.DLL V5.41.0.0
+Dialog DLL:      DCM.DLL V1.17.5.0
+Target DLL:      STLink\ST-LINKIII-KEIL_SWO.dll V3.3.0.0
+Dialog DLL:      TCM.DLL V1.56.4.0
+ 
+<h2>Project:</h2>
+C:\Users\Abhishek Gawayi\Desktop\BITS College Stuff\2nd semester\SeS\Project_v1\v1.uvprojx
+Project File Date:  04/19/2026
+
+<h2>Output:</h2>
+*** Using Compiler 'V6.22', folder: 'C:\Keil_541\ARM\ARMCLANG\Bin'
+Rebuild target 'Target_1'
+compiling safety_manager.c...
+compiling logger.c...
+compiling dispatcher.c...
+compiling input_acq.c...
+compiling supervisor.c...
+compiling output_mgr.c...
+compiling main.c...
+compiling signal_proc.c...
+compiling retarget_io.c...
+compiling system_stm32f4xx.c...
+assembling startup_stm32f407xx.s...
+linking...
+Program Size: Code=7944 RO-data=548 RW-data=4 ZI-data=1816  
+".\Objects\v1.axf" - 0 Error(s), 0 Warning(s).
+
+<h2>Software Packages used:</h2>
+
+Package Vendor: ARM
+                https://www.keil.com/pack/ARM.CMSIS.6.1.0.pack
+                ARM::CMSIS@6.1.0
+                CMSIS (Common Microcontroller Software Interface Standard)
+   * Component: CORE Version: 6.1.0
+
+Package Vendor: ARM
+                https://www.keil.com/pack/ARM.CMSIS-Compiler.2.1.0.pack
+                ARM::CMSIS-Compiler@2.1.0
+                CMSIS Compiler extensions for Arm Compiler, GCC, Clang, and IAR Compiler
+   * Component: CORE Version: 1.1.0
+
+Package Vendor: Keil
+                https://www.keil.com/pack/Keil.STM32F4xx_DFP.2.17.1.pack
+                Keil::STM32F4xx_DFP@2.17.1
+                STMicroelectronics STM32F4 Series Device Support, Drivers and Examples
+   * Component: Startup Version: 2.6.3
+
+<h2>Collection of Component include folders:</h2>
+  ./RTE/_Target_1
+  C:/Keil_541/ARM/CMSIS/6.1.0/CMSIS/Core/Include
+  C:/Keil_541/Keil/STM32F4xx_DFP/2.17.1/Drivers/CMSIS/Device/ST/STM32F4xx/Include
+
+<h2>Collection of Component Files used:</h2>
+
+   * Component: ARM::CMSIS-Compiler:CORE@1.1.0
+      Source file:   source/armcc/retarget_io.c
+
+   * Component: ARM::CMSIS:CORE@6.1.0
+
+   * Component: Keil::Device:Startup@2.6.3
+      Source file:   MDK/Device/Source/ARM/STM32F40xxx_41xxx_OPT.s
+      Source file:   MDK/Device/Source/ARM/STM32F4xx_OTP.s
+      Include file:  Drivers/CMSIS/Device/ST/STM32F4xx/Include/stm32f4xx.h
+      Source file:   Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/arm/startup_stm32f407xx.s
+      Source file:   Drivers/CMSIS/Device/ST/STM32F4xx/Source/Templates/system_stm32f4xx.c
+Build Time Elapsed:  00:00:01
+</pre>
+</body>
+</html>

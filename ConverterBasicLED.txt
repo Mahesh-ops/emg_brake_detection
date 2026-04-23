@@ -1,0 +1,129 @@
+#include "stm32f4xx.h"
+
+// Function Prototypes
+void SystemClock_Config(void);
+void GPIO_Init(void);
+void UART1_Init(void);
+char UART1_ReadChar(void);
+
+int main(void) {
+    // 1. Initialize the system
+    SystemClock_Config(); // Set clock to 168 MHz using HSE and PLL
+    GPIO_Init();          // Initialize GPIOD for LEDs
+    UART1_Init();         // Initialize USART1 at 9600 baud
+    
+    char received_data;
+    
+    // Ensure all LEDs are off at start
+    GPIOD->ODR &= ~((1<<12) | (1<<13) | (1<<14) | (1<<15)); 
+
+    while(1) {
+        received_data = UART1_ReadChar(); // Wait and read incoming char
+        
+        switch(received_data) {
+            case '0':
+                // Reset all LEDs
+                GPIOD->BSRR = ((1<<12) | (1<<13) | (1<<14) | (1<<15)) << 16; 
+                break;
+            case '1':
+                // Activate Green LED (PD12)
+                GPIOD->BSRR = (1<<12); 
+                break;
+            case '2':
+                // Activate Red LED (PD14)
+                GPIOD->BSRR = (1<<14); 
+                break;
+            case '3':
+                // Activate Blue LED (PD15)
+                GPIOD->BSRR = (1<<15); 
+                break;
+            case '4':
+                // Activate Orange LED (PD13)
+                GPIOD->BSRR = (1<<13); 
+                break;
+            case '5':
+                // Activate all LEDs
+                GPIOD->BSRR = ((1<<12) | (1<<13) | (1<<14) | (1<<15)); 
+                break;
+            default:
+                GPIOD->BSRR = ((1<<(12+16)) | (1<<(13+16)) | (1<<(14+16)) | (1<<(15+16)));
+                break;
+        }
+    }
+}
+
+// Configures the system clock to 168 MHz using the 8 MHz HSE crystal
+void SystemClock_Config(void) {
+    // 1. Enable HSE and wait for it to be ready
+    RCC->CR |= RCC_CR_HSEON;
+    while (!(RCC->CR & RCC_CR_HSERDY));
+
+    // 2. Set Power Enable Clock and Voltage Regulator
+    RCC->APB1ENR |= RCC_APB1ENR_PWREN;
+    PWR->CR |= PWR_CR_VOS;
+
+    // 3. Configure Flash prefetch, Instruction cache, Data cache, and wait states (5 WS for 168 MHz)
+    FLASH->ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN | FLASH_ACR_LATENCY_5WS;
+
+    // 4. Configure the Main PLL
+    // Formula: f(VCO clock) = f(PLL clock input) * (PLLN / PLLM)
+    // Formula: f(PLL general clock output) = f(VCO clock) / PLLP
+    // Input = 8MHz. M=8, N=336, P=2. System Clock = (8/8) * 336 / 2 = 168 MHz
+    RCC->PLLCFGR = (8ul) | (336ul << 6) | (0ul << 16) | RCC_PLLCFGR_PLLSRC_HSE | (7ul << 24);
+
+    // 5. Enable the Main PLL and wait for it to be ready
+    RCC->CR |= RCC_CR_PLLON;
+    while (!(RCC->CR & RCC_CR_PLLRDY));
+
+    // 6. Configure AHB/APB prescalers
+    // AHB = 168 MHz (Prescaler 1), APB1 = 42 MHz (Prescaler 4), APB2 = 84 MHz (Prescaler 2)
+    RCC->CFGR |= RCC_CFGR_HPRE_DIV1 | RCC_CFGR_PPRE1_DIV4 | RCC_CFGR_PPRE2_DIV2;
+
+    // 7. Select the main PLL as system clock source and wait for it to be used
+    RCC->CFGR |= RCC_CFGR_SW_PLL;
+    while ((RCC->CFGR & RCC_CFGR_SWS) != RCC_CFGR_SWS_PLL);
+}
+
+// Configures PD12, PD13, PD14, PD15 as general purpose output
+void GPIO_Init(void) {
+    // Enable GPIOD clock on AHB1
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+    
+    // Clear mode bits for PD12-PD15, then set to 01 (General purpose output mode)
+    GPIOD->MODER &= ~((3ul<<24) | (3ul<<26) | (3ul<<28) | (3ul<<30));
+    GPIOD->MODER |= ((1ul<<24) | (1ul<<26) | (1ul<<28) | (1ul<<30));
+    
+    // Optional: Set to push-pull (default), low speed (default), no pull-up/pull-down (default)
+}
+
+// Configures USART1 on PA9 (TX) and PA10 (RX) at 9600 Baud
+void UART1_Init(void) {
+    // 1. Enable clocks for GPIOA and USART1
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
+    RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
+    
+    // 2. Configure PA9 and PA10 to Alternate Function mode
+    GPIOA->MODER &= ~((3ul<<18) | (3ul<<20));
+    GPIOA->MODER |= ((2ul<<18) | (2ul<<20));
+    
+    // 3. Set Alternate Function to AF7 (USART1) for PA9 and PA10
+    GPIOA->AFR[1] &= ~((15ul<<4) | (15ul<<8));
+    GPIOA->AFR[1] |= ((7ul<<4) | (7ul<<8));
+    
+    // 4. Set Baud Rate to 9600
+    // APB2 is running at 84 MHz. 
+    // BRR = APB2_Clock / Baudrate = 84,000,000 / 9600 = 8750 = 0x222E
+    USART1->BRR = 0x222E;
+    
+    // 5. Enable USART, Transmitter, and Receiver
+    USART1->CR1 = USART_CR1_UE | USART_CR1_TE | USART_CR1_RE;
+}
+
+// Blocking function to read one character from USART1
+char UART1_ReadChar(void) {
+    // Wait until RXNE (Read Data Register Not Empty) bit is set
+    while (!(USART1->SR & USART_SR_RXNE));
+    
+    // Read and return the data
+    return (char)USART1->DR;
+}
