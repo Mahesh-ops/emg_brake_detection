@@ -40,8 +40,12 @@ void SafetyManager_EvaluateRMS(float short_rms, float long_rms) {
   float dynamic_threshold = baseline_rms * RMS_THRESHOLD_MULTIPLIER;
 
   // 3. INTENT DETECTION
-  // Intent is active if BOTH short and long windows exceed the threshold
-  if (short_rms > dynamic_threshold && long_rms > dynamic_threshold) {
+  // Intent is detected by checking the difference between short and long RMS.
+  // This ensures we detect sudden spikes relative to the moving long window,
+  // while still taking the resting baseline into consideration.
+  float rms_difference = short_rms - long_rms;
+
+  if (rms_difference > dynamic_threshold) {
     consecutive_spikes++;
 
     if (consecutive_spikes >= REQUIRED_CONSECUTIVE_SPIKES) {
